@@ -13,6 +13,7 @@ I wanted to build a Flutter and learn dart, but not some simple hello wolrd exam
 ## Demo
 
 Demo time!
+
 ![./docs/demo.gif](./docs/demo.gif)
 
 ## Getting Started
