@@ -10,15 +10,16 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 Future<Location> fetchLocation(url) async {
-  final response =
-  await http.get(url);
+  await Future.delayed(const Duration(seconds: 5));
+  final response = await http.get(url);
 
   if (response.statusCode == 200) {
     // If the call to the server was successful, parse the JSON
     return Location.fromJson(json.decode(response.body));
   } else {
     // If that call was not successful, throw an error.
-    throw Exception('👈 Have you seen this man?\n No tracking data available 😱');
+    throw Exception(
+        '👈 Have you seen this man?\n No tracking data available 😱');
   }
 }
 
@@ -60,63 +61,68 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => new _MyHomePageState();
 }
 
-
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return <Widget>[
-            SliverAppBar(
-              backgroundColor: Theme.of(context).accentColor,
-              expandedHeight: 250.0,
-              floating: false,
-              pinned: true,
-              flexibleSpace: FlexibleSpaceBar(
-                  centerTitle: true,
-                  title: Text(AppConfig.of(context).appName,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16.0,
-                      )),
-                  background: Image.network(
-                    AppConfig.of(context).heroImageUrl,
-                    fit: BoxFit.cover,
-                  )),
-            ),
-          ];
-        },
-        body: Center(
-          child: new Container(
-              height: 150.0,
-              margin: const EdgeInsets.symmetric(
-                vertical: 16.0,
-                horizontal: 16.0,
-              ),
-              child: new Stack(children:  [
-                GTSCard(child: FutureBuilder<Location>(
-                  future: fetchLocation("${AppConfig.of(context).apiBaseUrl}gts/loadLatest"),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return GTSCardContent(
-                        destination: snapshot.data.destination,
-                        eta: snapshot.data.eta,
-                        emoji: snapshot.data.emoji,
-                      );
-                    } else if (snapshot.hasError) {
-                      return GTSCardContentError(error: snapshot.error.toString().replaceAll("Exception:", ""));
-                    }
-
-                    // By default, show a loading spinner
-                    return Spinner();
-                  },
+        body: NestedScrollView(
+      headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+        return <Widget>[
+          SliverAppBar(
+            backgroundColor: Theme.of(context).accentColor,
+            expandedHeight: 250.0,
+            floating: false,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+                centerTitle: true,
+                title: Text(AppConfig.of(context).appName,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.0,
+                    )),
+                background: Image.network(
+                  AppConfig.of(context).heroImageUrl,
+                  fit: BoxFit.cover,
                 )),
-                  GTSThumbnail(context),
-                ],
+          ),
+        ];
+      },
+      body: Center(
+        child: new Container(
+          height: 150.0,
+          margin: const EdgeInsets.symmetric(
+            vertical: 16.0,
+            horizontal: 16.0,
+          ),
+          child: new Stack(
+            children: [
+              GTSCard(
+                  child: FutureBuilder<Location>(
+                future: fetchLocation(
+                    "${AppConfig.of(context).apiBaseUrl}gts/loadLatest"),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return GTSCardContent(
+                      destination: snapshot.data.destination,
+                      eta: "${snapshot.data.eta}",
+                      emoji: snapshot.data.emoji,
+                    );
+                  } else if (snapshot.hasError) {
+                    return GTSCardContentError(
+                        error: snapshot.error
+                            .toString()
+                            .replaceAll("Exception:", ""));
+                  }
+
+                  // By default, show a loading spinner
+                  return Spinner();
+                },
               )),
+              GTSThumbnail(context),
+            ],
+          ),
         ),
       ),
-    );
+    ));
   }
 }
