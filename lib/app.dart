@@ -2,6 +2,41 @@ import 'package:flutter/material.dart';
 import 'package:george_tracking_system/app_config.dart';
 import 'package:george_tracking_system/components/thumbnail.dart';
 import 'package:george_tracking_system/components/card.dart';
+import 'package:george_tracking_system/components/spinner.dart';
+
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+Future<Location> fetchLocation(url) async {
+  final response =
+  await http.get(url);
+
+  if (response.statusCode == 200) {
+    // If the call to the server was successful, parse the JSON
+    return Location.fromJson(json.decode(response.body));
+  } else {
+    // If that call was not successful, throw an error.
+    throw Exception('👈 Have you seen this man?\n No tracking data available 😱');
+  }
+}
+
+class Location {
+  final String destination;
+  final String eta;
+  final String emoji;
+
+  Location({this.destination, this.eta, this.emoji});
+
+  factory Location.fromJson(Map<String, dynamic> json) {
+    return Location(
+      destination: json['destination'],
+      eta: json['eta'],
+      emoji: json['emoji'],
+    );
+  }
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -25,12 +60,6 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => new _MyHomePageState();
 }
 
-Container papoi(context) {
-  return new Container(
-      alignment: Alignment(0.0, 0.0),
-      child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Theme.of(context).backgroundColor))
-  );
-}
 
 class _MyHomePageState extends State<MyHomePage> {
   @override
@@ -46,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
               pinned: true,
               flexibleSpace: FlexibleSpaceBar(
                   centerTitle: true,
-                  title: Text("George Tracking System",
+                  title: Text(AppConfig.of(context).appName,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16.0,
@@ -65,9 +94,24 @@ class _MyHomePageState extends State<MyHomePage> {
                 vertical: 16.0,
                 horizontal: 16.0,
               ),
-              child: new Stack(
-                children: <Widget>[
-                  GTSCard(context, papoi(context)),
+              child: new Stack(children:  [
+                GTSCard(child: FutureBuilder<Location>(
+                  future: fetchLocation("${AppConfig.of(context).apiBaseUrl}gts/loadLatest"),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return GTSCardContent(
+                        destination: snapshot.data.destination,
+                        eta: snapshot.data.eta,
+                        emoji: snapshot.data.emoji,
+                      );
+                    } else if (snapshot.hasError) {
+                      return GTSCardContentError(error: snapshot.error.toString().replaceAll("Exception:", ""));
+                    }
+
+                    // By default, show a loading spinner
+                    return Spinner();
+                  },
+                )),
                   GTSThumbnail(context),
                 ],
               )),
