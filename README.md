@@ -1,6 +1,6 @@
 # George Tracking System
 
-Track your Geroge from your mobile
+Track your George from your mobile.
 
 ## Why?
 
@@ -8,7 +8,7 @@ You want a coffee but you don't know where George is? This app will help track h
 
 ## No seriously, why?
 
-I wanted to build a Flutter and learn dart, but not some simple hello wolrd example, this is the silly idea I came up with 🤷
+I wanted to build a Flutter and learn Dart, but not some simple hello world example. This is the silly idea I came up with 🤷
 
 ## Demo
 
@@ -18,4 +18,4 @@ Demo time!
 
 ## Getting Started
 
-This app is built using flutter, for more info go to the [documentation](https://flutter.io/).
+This app is built using Flutter. For more info go to the [documentation](https://flutter.io/).
